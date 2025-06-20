@@ -29,10 +29,6 @@
       {
         "type": "python3",
         "path": "Scripts/interaction.py"
-      },
-      {
-        "type": "monkeyreplay",
-        "path": "Scripts/monkey.txt"
       }
     ],
     "before_close": "Scripts/before_close.py",
