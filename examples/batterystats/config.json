@@ -1,7 +1,7 @@
 {
   "type": "native",
   "devices": {
-    "j7duo2": {}
+    "Nexus 4": {}
   },
   "repetitions": 3,
   "duration": 60000,

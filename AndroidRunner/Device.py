@@ -8,6 +8,7 @@ from .Adb import AdbError
 from .util import ConfigError, makedirs
 from . import Tests
 import subprocess
+import traceback
 
 
 class Device:

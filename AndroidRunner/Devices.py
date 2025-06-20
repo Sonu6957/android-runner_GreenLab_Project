@@ -12,7 +12,7 @@ class Devices:
     def __init__(self, devices, adb_path='adb', devices_spec=None):
         if devices_spec is None:
             devices_spec = op.join(ROOT_DIR, 'devices.json')
-            
+        
         Adb.setup(adb_path)
         mapping_file = load_json(devices_spec)
         self._device_map = {n: mapping_file.get(n, None) for n in devices}
