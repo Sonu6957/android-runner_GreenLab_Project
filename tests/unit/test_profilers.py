@@ -2,7 +2,7 @@ import os
 from shutil import copyfile
 
 import pytest
-from mock import MagicMock, Mock, patch
+from mock import MagicMock, Mock, patch, call
 
 import paths
 from AndroidRunner.PluginHandler import PluginHandler
@@ -440,9 +440,7 @@ class TestPluginHandler(object):
         android_test_plugin_handler.aggregate_subjects_default(tmpdir)
 
         assert mock_profiler.set_output.call_count == 3
-        mock_profiler.set_output.called_with(created_paths[0])
-        mock_profiler.set_output.called_with(created_paths[1])
-        mock_profiler.set_output.called_with(created_paths[2])
+        mock_profiler.set_output.assert_has_calls([call(created_paths[2]), call(created_paths[1]), call(created_paths[0])])
         assert mock_profiler.aggregate_subject.call_count == 3
 
     def test_aggregate_subject_default_web_experiment(self, android_test_plugin_handler, tmpdir):
@@ -457,7 +455,5 @@ class TestPluginHandler(object):
         android_test_plugin_handler.aggregate_subjects_default(tmpdir)
 
         assert mock_profiler.set_output.call_count == 3
-        mock_profiler.set_output.called_with(created_paths[0])
-        mock_profiler.set_output.called_with(created_paths[1])
-        mock_profiler.set_output.called_with(created_paths[2])
+        mock_profiler.set_output.assert_has_calls([call(created_paths[2]), call(created_paths[1]), call(created_paths[0])])
         assert mock_profiler.aggregate_subject.call_count == 3

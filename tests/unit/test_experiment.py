@@ -35,7 +35,6 @@ class TestExperiment(object):
         config['repetitions'] = 10
         config['paths'] = ['test/paths/1', 'test/paths/2']
         config['profilers'] = {'fake': {'config1': 1, 'config2': 2}}
-        #config['monkeyrunner_path'] = 'monkey_path'
         config['scripts'] = {'script1': 'path/to/1'}
         config['reset_adb_among_runs'] = True
         config['time_between_run'] = 10
@@ -140,7 +139,6 @@ class TestExperiment(object):
         assert experiment.result_file_structure is None
         mock_devices.assert_called_once_with(['dev1', 'dev2'], adb_path='test_adb', devices_spec=None)
         mock_profilers.assert_called_once_with({'fake': {'config1': 1, 'config2': 2}})
-        #mock_scripts.assert_called_once_with({'script1': 'path/to/1'}, monkeyrunner_path='monkey_path', monkey_playback_path='monkey_playback.py')
         mock_test.assert_called_once_with(experiment.devices, [])
         assert mock_prepare.call_count == 0
 
@@ -295,7 +293,7 @@ class TestExperiment(object):
 
         default_experiment.stop_run()
 
-        default_experiment.queue.called_once_with(PrematureStoppableRun.STOPPING_MECHANISM_FUNCTION_CALL)
+        default_experiment.queue.put.assert_called_once_with(PrematureStoppableRun.STOPPING_MECHANISM_FUNCTION_CALL)
 
     @patch('AndroidRunner.Experiment.Experiment.prepare_device')
     @patch('AndroidRunner.Experiment.Experiment.before_experiment')
@@ -1230,7 +1228,7 @@ class TestNativeExperiment(object):
         experiment.assert_called_once_with(config, None, False)
         assert native_experiment.duration == 1
         assert isfile.call_count == 3
-        isfile.has_calls([call(test_paths[0]), call(test_paths[1]), call(test_paths[2])])
+        isfile.assert_has_calls([call(test_paths[0]), call(test_paths[1]), call(test_paths[2])])
 
     @patch('os.path.isfile')
     @patch('AndroidRunner.Experiment.Experiment.__init__')
