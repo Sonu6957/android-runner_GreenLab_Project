@@ -22,12 +22,15 @@ class Experiment(object):
         self.progress = progress
         self.basedir = None
         self.random = config.get('randomization', False)
+        
         Tests.is_valid_option(self.random, valid_options=[True, False])
         self.clear_cache = config.get('clear_cache', False)
         Tests.is_valid_option(self.clear_cache, valid_options=[True, False])
+        
         if 'devices' not in config:
             raise ConfigError('"device" is required in the configuration')
         adb_path = config.get('adb_path', 'adb')
+        
         self.devices = Devices(config['devices'], adb_path=adb_path, devices_spec=config.get('devices_spec'))
         self.repetitions = Tests.is_integer(config.get('repetitions', 1))
         self.paths = config.get('paths', [])
@@ -41,13 +44,13 @@ class Experiment(object):
         Tests.check_dependencies(self.devices, self.profilers.dependencies())
         self.output_root = paths.OUTPUT_DIR
         self.result_file_structure = None
-        
+
         self.usb_handler_config = config.get("usb_handler", None)
         self.usb_handler = USBHandler(self.usb_handler_config)
 
         self.run_stopping_condition_config = config.get("run_stopping_condition", None)
         self.queue = mp.Queue()
-        
+
         if restart:
             for device in self.devices:
                 self.prepare_device(device, restart=True)

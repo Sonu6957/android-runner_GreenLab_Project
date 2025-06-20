@@ -11,11 +11,14 @@ class Scripts(object):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.scripts = {}
         for name, script in list(config.items()):
+            print(f"{name}, {script}")
             self.scripts[name] = []
             if isinstance(script, str):
                 path = op.join(paths.CONFIG_DIR, script)
+                print(f"The path for this one is {path}")
                 self.scripts[name].append(Python3(path))
                 continue
+
             for s in script:
                 path = op.join(paths.CONFIG_DIR, s['path'])
                 timeout = s.get('timeout', 0)
@@ -27,6 +30,7 @@ class Scripts(object):
                     raise ConfigError('Unknown script type: {}'.format(s['type']))
 
                 self.scripts[name].append(script)
+
 
     def run(self, name, device, *args, **kwargs):
         self.logger.debug('Running hook {} on device {}\nargs: {}\nkwargs: {}'.format(name, device, args, kwargs))
