@@ -14,5 +14,5 @@
   "GalaxyJ7-W": "192.168.0.106:5555",
 
   "Nexus 4": "emulator-5554",
-  "Pixel 6": "pixel_6",
+  "Pixel 6": "emulator-5554"
 }

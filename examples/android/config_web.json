@@ -1,7 +1,7 @@
 {
   "type": "web",
   "devices": {
-    "nexus6p": {}
+    "Pixel 6": {}
   },
   "repetitions": 1,
   "browsers": [
@@ -12,7 +12,7 @@
   ],
   "profilers": {
     "android": {
-      "subject_aggregation": "default",
+      "subject_aggregation": "none",
       "experiment_aggregation": "Scripts/aggregate_android.py",
       "sample_interval": 100,
       "data_points": [

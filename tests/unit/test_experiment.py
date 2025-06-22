@@ -943,6 +943,7 @@ class TestWebExperiment(object):
     def test_run(self, before_run, after_launch, start_profiling, interaction, stop_profiling, before_close, after_run,
                  web_experiment):
         mock_device = Mock()
+        mock_device.get_version.return_value =  "10"
         path = "test/path"
         run = 123456789
         mock_browser = Mock()
@@ -984,6 +985,7 @@ class TestWebExperiment(object):
                  web_experiment):
         premature_stoppable_run_init.return_value = None
         mock_device = Mock()
+        mock_device.get_version.return_value =  "10"
         path = "test/path"
         run = 123456789
         run_stopping_condition_config = {"post_request" : {}}

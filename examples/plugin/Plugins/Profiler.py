@@ -45,3 +45,8 @@ class Profiler(object):
          Data located in file structure inside data_dir. Save aggregated data to output_file
         """
         raise NotImplementedError
+
+
+
+class ProfilerException(Exception):
+    pass

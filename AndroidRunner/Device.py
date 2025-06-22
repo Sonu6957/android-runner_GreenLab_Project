@@ -197,6 +197,7 @@ class Device:
         # https://android.stackexchange.com/a/113919
         if from_scratch:
             cmd += ' --activity-clear-task'
+
         return Adb.shell(self.id, cmd)
 
     def force_stop(self, name):
