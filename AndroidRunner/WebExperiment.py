@@ -15,6 +15,7 @@ class WebExperiment(Experiment):
         self.browsers = [BrowserFactory.get_browser(b)() for b in config.get('browsers', ['chrome'])]
         Tests.check_dependencies(self.devices, [b.package_name for b in self.browsers])
         self.duration = Tests.is_integer(config.get('duration', 0)) / 1000
+        self.config = config
     
     # Browsers have version specific formatting, allows re-creation if needed
     def regenerate_browsers(self, device):
@@ -27,7 +28,8 @@ class WebExperiment(Experiment):
             if browser_name in browserItem.to_string():
                 browser = browserItem
         kwargs = {
-            'browser': browser
+            'browser': browser,
+            'app': browser.package_name
         }
         self.before_run(device, path, run, **kwargs)
         self.after_launch(device, path, run, **kwargs)

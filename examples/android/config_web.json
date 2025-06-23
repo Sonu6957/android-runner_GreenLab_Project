@@ -19,6 +19,10 @@
         "cpu",
         "mem"
       ]
+    },
+    "Frametimes": {
+      "subject_aggregation" : "default",
+      "sample_interval": 1000
     }
   },
   "scripts": {

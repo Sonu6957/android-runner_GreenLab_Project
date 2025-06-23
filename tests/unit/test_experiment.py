@@ -21,7 +21,7 @@ from AndroidRunner.WebExperiment import WebExperiment
 from AndroidRunner.util import ConfigError, makedirs
 from tests.PluginTests import PluginTests
 from AndroidRunner.PrematureStoppableRun import PrematureStoppableRun
-
+from tests.unit.fixtures.FakeDevice import FakeDevice
 
 # noinspection PyUnusedLocal
 class TestExperiment(object):
@@ -498,7 +498,7 @@ class TestExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2}
         mock_device = Mock()
         mock_device.id = 123
-        current_activity = 'Working on theses'
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 1234566789
@@ -549,7 +549,7 @@ class TestExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2}
         mock_device = Mock()
         mock_device.id = 123
-        current_activity = 'Working on theses'
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 1234566789
@@ -1090,7 +1090,7 @@ class TestWebExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2, 'browser': mock_browser}
         mock_device = Mock()
         mock_device.id = 'id'
-        current_activity = "playing euro truck simulator 2"
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 123456789
@@ -1136,7 +1136,7 @@ class TestWebExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2, 'browser': mock_browser}
         mock_device = Mock()
         mock_device.id = 'id'
-        current_activity = "playing euro truck simulator 2"
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 123456789
@@ -1335,7 +1335,7 @@ class TestNativeExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2}
         mock_device = Mock()
         mock_device.id = 'id'
-        current_activity = "playing euro truck simulator 2"
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 123456789
@@ -1377,7 +1377,7 @@ class TestNativeExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2}
         mock_device = Mock()
         mock_device.id = 'id'
-        current_activity = "playing euro truck simulator 2"
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 123456789

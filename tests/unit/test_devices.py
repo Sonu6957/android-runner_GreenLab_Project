@@ -7,7 +7,7 @@ import AndroidRunner.Adb as Adb
 from AndroidRunner.Device import Device
 from AndroidRunner.Devices import Devices
 from AndroidRunner.util import ConfigError
-
+from tests.unit.fixtures.FakeDevice import FakeDevice
 
 class TestDevice(object):
 
@@ -372,8 +372,8 @@ class TestDevice(object):
 
     @patch('AndroidRunner.Adb.shell')
     def test_current_activity_success(self, adb_shell, device):
-        adb_shell.return_value = "com.android.chrome"
-        assert device.current_activity() == "com.android.chrome"
+        adb_shell.return_value = 'test\norg.activity'
+        assert device.current_activity() == {'type': 'test', 'name': 'org.activity'}
 
     @patch('AndroidRunner.Adb.shell')
     def test_current_activity_error(self, adb_shell, device):

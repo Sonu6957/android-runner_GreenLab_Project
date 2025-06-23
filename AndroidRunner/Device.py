@@ -164,10 +164,11 @@ class Device:
 
     def current_activity(self):
         """Newer Android 10 does not have mCurrentFocus and mFocusedApp. Different approach to get the current activity"""
-        recent_activity = Adb.shell(self.id,'dumpsys activity recents | grep "Recent #0" | cut -d "=" -f2 | grep -o -p "[a-z|.]*"')
-
+        recent_activity = Adb.shell(self.id,'dumpsys activity recents | grep "Recent #0" | tr " }" "\n" | grep "=" | cut -d "=" -f 2 | sed -E "s/[^a-zA-Z.]+//g"')
+        
+        """Recent activities have both a type (home/standard/ect.) as well as a name e.g. com.android.chrome"""
         if recent_activity:
-            result = recent_activity
+            result = {"type": recent_activity.split("\n")[0], "name": recent_activity.split("\n")[1]}
             self.logger.debug('Current activity: %s' % result)
             return result
         else:
