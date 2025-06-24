@@ -951,6 +951,11 @@ class TestWebExperiment(object):
         web_experiment.browsers = [mock_browser]
         web_experiment.run(mock_device, path, run, 'chrome')
 
+        kwargs = {
+            "browser": mock_browser,
+            "app": mock_browser.package_name
+        }
+
         mock_manager = Mock()
         mock_manager.attach_mock(before_run, "before_run_managed")
         mock_manager.attach_mock(after_launch, "after_launch_managed")
@@ -962,13 +967,17 @@ class TestWebExperiment(object):
 
         web_experiment.run(mock_device, path, run, 'chrome')
 
-        expected_calls = [call.before_run_managed(mock_device, path, run, browser=mock_browser),
-                          call.after_launch_managed(mock_device, path, run, browser=mock_browser),
-                          call.start_profiling_managed(mock_device, path, run, browser=mock_browser),
-                          call.interaction_managed(mock_device, path, run, browser=mock_browser),
-                          call.stop_profiling_managed(mock_device, path, run, browser=mock_browser),
-                          call.before_close_managed(mock_device, path, run, browser=mock_browser),
-                          call.after_run_managed(mock_device, path, run, browser=mock_browser)]
+        expected_calls = [call.before_run_managed(mock_device, path, run, **kwargs),
+                          call.after_launch_managed(mock_device, path, run, **kwargs),
+                          call.start_profiling_managed(mock_device, path, run, **kwargs),
+                          call.interaction_managed(mock_device, path, run, **kwargs),
+                          call.stop_profiling_managed(mock_device, path, run, **kwargs),
+                          call.before_close_managed(mock_device, path, run, **kwargs),
+                          call.after_run_managed(mock_device, path, run, **kwargs)]
+        
+        from pprint import pprint
+        pprint(mock_manager.mock_calls)
+        pprint(expected_calls)
         assert mock_manager.mock_calls == expected_calls
 
     @patch('AndroidRunner.WebExperiment.WebExperiment.after_run')
@@ -994,8 +1003,10 @@ class TestWebExperiment(object):
         web_experiment.browsers = [mock_browser]
         web_experiment.run_stopping_condition_config = run_stopping_condition_config
         web_experiment.queue = queue
+
         kwargs = {
-            'browser': mock_browser
+            'browser': mock_browser,
+            'app': mock_browser.package_name
         }
 
         queue_value = None
