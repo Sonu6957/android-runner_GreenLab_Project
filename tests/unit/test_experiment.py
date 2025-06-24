@@ -974,10 +974,6 @@ class TestWebExperiment(object):
                           call.stop_profiling_managed(mock_device, path, run, **kwargs),
                           call.before_close_managed(mock_device, path, run, **kwargs),
                           call.after_run_managed(mock_device, path, run, **kwargs)]
-        
-        from pprint import pprint
-        pprint(mock_manager.mock_calls)
-        pprint(expected_calls)
         assert mock_manager.mock_calls == expected_calls
 
     @patch('AndroidRunner.WebExperiment.WebExperiment.after_run')

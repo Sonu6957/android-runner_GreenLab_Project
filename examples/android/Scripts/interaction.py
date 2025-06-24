@@ -13,6 +13,3 @@ def main(device: Device, *args: tuple, **kwargs: dict):
     
     LOGGER.debug(device.current_activity())
     LOGGER.debug(current_run)
-
-    print(device.current_activity())
-    print(current_run)
