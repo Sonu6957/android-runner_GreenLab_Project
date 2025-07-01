@@ -2,7 +2,7 @@ import os
 import os.path as op
 import subprocess
 import pytest
-from mock import Mock, patch
+from mock import Mock, patch, call
 from AndroidRunner.USBHandler import USBHandler, USBHandlerException
 import AndroidRunner.Tests as Tests
 import AndroidRunner.util as util
@@ -71,8 +71,8 @@ class TestUtilClass(object):
 
         new_function = util.keyboardinterrupt_handler(test_function)
         new_function()
-
-        psutil_mock.terminate.called_once()
+        
+        psutil_mock.return_value.terminate.assert_called_once()
 
     def test_makedirs_succes(self, tmpdir):
         dir_path = op.join(str(tmpdir), 'test1')

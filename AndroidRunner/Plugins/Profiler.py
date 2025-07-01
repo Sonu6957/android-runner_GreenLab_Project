@@ -46,7 +46,5 @@ class Profiler(object):
         """
         raise NotImplementedError
 
-
-
 class ProfilerException(Exception):
     pass

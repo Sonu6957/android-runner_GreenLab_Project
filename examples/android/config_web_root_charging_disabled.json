@@ -1,7 +1,7 @@
 {
   "type": "web",
   "devices": {
-    "nexus5x": {
+    "Pixel 6": {
       "root_disable_charging": "True",
       "charging_disabled_value": 0,
       "usb_charging_disabled_file": "sys/class/power_supply/battery/charging_enabled"
@@ -10,7 +10,7 @@
   "repetitions": 1,
   "randomization": false,
   "browsers": [
-    "firefox"
+    "chrome"
   ],
   "paths": [
     "https://google.com/",

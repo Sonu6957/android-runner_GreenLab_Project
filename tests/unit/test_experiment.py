@@ -21,7 +21,7 @@ from AndroidRunner.WebExperiment import WebExperiment
 from AndroidRunner.util import ConfigError, makedirs
 from tests.PluginTests import PluginTests
 from AndroidRunner.PrematureStoppableRun import PrematureStoppableRun
-
+from tests.unit.fixtures.FakeDevice import FakeDevice
 
 # noinspection PyUnusedLocal
 class TestExperiment(object):
@@ -35,7 +35,6 @@ class TestExperiment(object):
         config['repetitions'] = 10
         config['paths'] = ['test/paths/1', 'test/paths/2']
         config['profilers'] = {'fake': {'config1': 1, 'config2': 2}}
-        config['monkeyrunner_path'] = 'monkey_path'
         config['scripts'] = {'script1': 'path/to/1'}
         config['reset_adb_among_runs'] = True
         config['time_between_run'] = 10
@@ -140,7 +139,6 @@ class TestExperiment(object):
         assert experiment.result_file_structure is None
         mock_devices.assert_called_once_with(['dev1', 'dev2'], adb_path='test_adb', devices_spec=None)
         mock_profilers.assert_called_once_with({'fake': {'config1': 1, 'config2': 2}})
-        mock_scripts.assert_called_once_with({'script1': 'path/to/1'}, monkeyrunner_path='monkey_path', monkey_playback_path='monkey_playback.py')
         mock_test.assert_called_once_with(experiment.devices, [])
         assert mock_prepare.call_count == 0
 
@@ -295,7 +293,7 @@ class TestExperiment(object):
 
         default_experiment.stop_run()
 
-        default_experiment.queue.called_once_with(PrematureStoppableRun.STOPPING_MECHANISM_FUNCTION_CALL)
+        default_experiment.queue.put.assert_called_once_with(PrematureStoppableRun.STOPPING_MECHANISM_FUNCTION_CALL)
 
     @patch('AndroidRunner.Experiment.Experiment.prepare_device')
     @patch('AndroidRunner.Experiment.Experiment.before_experiment')
@@ -500,7 +498,7 @@ class TestExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2}
         mock_device = Mock()
         mock_device.id = 123
-        current_activity = 'Working on theses'
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 1234566789
@@ -551,7 +549,7 @@ class TestExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2}
         mock_device = Mock()
         mock_device.id = 123
-        current_activity = 'Working on theses'
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 1234566789
@@ -945,12 +943,18 @@ class TestWebExperiment(object):
     def test_run(self, before_run, after_launch, start_profiling, interaction, stop_profiling, before_close, after_run,
                  web_experiment):
         mock_device = Mock()
+        mock_device.get_version.return_value =  "10"
         path = "test/path"
         run = 123456789
         mock_browser = Mock()
         mock_browser.to_string.return_value = 'chrome'
         web_experiment.browsers = [mock_browser]
         web_experiment.run(mock_device, path, run, 'chrome')
+
+        kwargs = {
+            "browser": mock_browser,
+            "app": mock_browser.package_name
+        }
 
         mock_manager = Mock()
         mock_manager.attach_mock(before_run, "before_run_managed")
@@ -963,13 +967,13 @@ class TestWebExperiment(object):
 
         web_experiment.run(mock_device, path, run, 'chrome')
 
-        expected_calls = [call.before_run_managed(mock_device, path, run, browser=mock_browser),
-                          call.after_launch_managed(mock_device, path, run, browser=mock_browser),
-                          call.start_profiling_managed(mock_device, path, run, browser=mock_browser),
-                          call.interaction_managed(mock_device, path, run, browser=mock_browser),
-                          call.stop_profiling_managed(mock_device, path, run, browser=mock_browser),
-                          call.before_close_managed(mock_device, path, run, browser=mock_browser),
-                          call.after_run_managed(mock_device, path, run, browser=mock_browser)]
+        expected_calls = [call.before_run_managed(mock_device, path, run, **kwargs),
+                          call.after_launch_managed(mock_device, path, run, **kwargs),
+                          call.start_profiling_managed(mock_device, path, run, **kwargs),
+                          call.interaction_managed(mock_device, path, run, **kwargs),
+                          call.stop_profiling_managed(mock_device, path, run, **kwargs),
+                          call.before_close_managed(mock_device, path, run, **kwargs),
+                          call.after_run_managed(mock_device, path, run, **kwargs)]
         assert mock_manager.mock_calls == expected_calls
 
     @patch('AndroidRunner.WebExperiment.WebExperiment.after_run')
@@ -986,6 +990,7 @@ class TestWebExperiment(object):
                  web_experiment):
         premature_stoppable_run_init.return_value = None
         mock_device = Mock()
+        mock_device.get_version.return_value =  "10"
         path = "test/path"
         run = 123456789
         run_stopping_condition_config = {"post_request" : {}}
@@ -994,8 +999,10 @@ class TestWebExperiment(object):
         web_experiment.browsers = [mock_browser]
         web_experiment.run_stopping_condition_config = run_stopping_condition_config
         web_experiment.queue = queue
+
         kwargs = {
-            'browser': mock_browser
+            'browser': mock_browser,
+            'app': mock_browser.package_name
         }
 
         queue_value = None
@@ -1090,7 +1097,7 @@ class TestWebExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2, 'browser': mock_browser}
         mock_device = Mock()
         mock_device.id = 'id'
-        current_activity = "playing euro truck simulator 2"
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 123456789
@@ -1136,7 +1143,7 @@ class TestWebExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2, 'browser': mock_browser}
         mock_device = Mock()
         mock_device.id = 'id'
-        current_activity = "playing euro truck simulator 2"
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 123456789
@@ -1230,7 +1237,7 @@ class TestNativeExperiment(object):
         experiment.assert_called_once_with(config, None, False)
         assert native_experiment.duration == 1
         assert isfile.call_count == 3
-        isfile.has_calls([call(test_paths[0]), call(test_paths[1]), call(test_paths[2])])
+        isfile.assert_has_calls([call(test_paths[0]), call(test_paths[1]), call(test_paths[2])])
 
     @patch('os.path.isfile')
     @patch('AndroidRunner.Experiment.Experiment.__init__')
@@ -1335,7 +1342,7 @@ class TestNativeExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2}
         mock_device = Mock()
         mock_device.id = 'id'
-        current_activity = "playing euro truck simulator 2"
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 123456789
@@ -1377,7 +1384,7 @@ class TestNativeExperiment(object):
         kwargs = {'arg1': 1, 'arg2': 2}
         mock_device = Mock()
         mock_device.id = 'id'
-        current_activity = "playing euro truck simulator 2"
+        current_activity = FakeDevice.current_activity()
         mock_device.current_activity.return_value = current_activity
         path = 'test/path'
         run = 123456789

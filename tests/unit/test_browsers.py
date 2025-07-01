@@ -62,6 +62,7 @@ class TestBrowsers(object):
         browser.main_activity = mock_main_activity
         mock_device = Mock()
         mock_device.id = "fake_device"
+        mock_device.get_version.return_value = "10"
         browser.start(mock_device)
         mock_log.assert_called_once_with('fake_device: Start')
         mock_device.launch_activity.assert_called_once_with(mock_package_name, mock_main_activity, from_scratch=True,

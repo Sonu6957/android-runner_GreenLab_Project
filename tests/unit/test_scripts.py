@@ -6,8 +6,6 @@ from mock import Mock, call, patch
 import time
 import paths
 import subprocess
-from AndroidRunner.MonkeyReplay import MonkeyReplay, MonkeyReplayError
-from AndroidRunner.MonkeyRunner import MonkeyRunner, MonkeyRunnerError
 from AndroidRunner.Python3 import Python3
 from AndroidRunner.Script import Script, ScriptError
 from AndroidRunner.Scripts import Scripts
@@ -55,42 +53,6 @@ class TestScripts(object):
         mock.assert_called_once_with(op.join(paths.CONFIG_DIR, test_path), 0, None)
         for script in scripts.scripts['interaction']:
             assert type(script) == Python3
-
-    @patch('AndroidRunner.MonkeyReplay.MonkeyReplay.__init__')
-    def test_monkeyreplay_interaction_script_init(self, mock, paths_dict):
-        mock.return_value = None
-        test_path = 'test/path/to/script.py'
-        test_config = collections.OrderedDict()
-        test_config['type'] = 'monkeyreplay'
-        test_config['path'] = test_path
-        test_config_list = list()
-        test_config_list.append(test_config)
-        interaction_test_config = collections.OrderedDict()
-        interaction_test_config['interaction'] = test_config_list
-        scripts = Scripts(interaction_test_config)
-
-        mock.assert_called_once_with(op.join(paths.CONFIG_DIR, test_path), 0, None, 'monkeyrunner')
-        for script in scripts.scripts['interaction']:
-            assert type(script) == MonkeyReplay
-
-    @patch('AndroidRunner.MonkeyRunner.MonkeyRunner.__init__')
-    def test_monkeyrunner_interaction_script_init(self, mock, paths_dict):
-        mock.return_value = None
-        test_path = 'test/path/to/script.monkeyrunner'
-        test_config = collections.OrderedDict()
-        test_config['type'] = 'monkeyrunner'
-        test_config['path'] = test_path
-        test_config['timeout'] = 100
-        test_config['logcat_regex'] = 'teststring'
-        test_config_list = list()
-        test_config_list.append(test_config)
-        interaction_test_config = collections.OrderedDict()
-        interaction_test_config['interaction'] = test_config_list
-        scripts = Scripts(interaction_test_config)
-
-        mock.assert_called_once_with(op.join(paths.CONFIG_DIR, test_path), 100, 'teststring', 'monkeyrunner', 'monkey_playback.py')
-        for script in scripts.scripts['interaction']:
-            assert type(script) == MonkeyRunner
 
     def test_unknown_interaction_script_init(self, paths_dict):
         test_path = 'test/path/to/script.py'
@@ -143,83 +105,6 @@ class TestPython3(object):
     def test_python3_execute_script(self, script_path):
         fake_device = Mock()
         assert Python3(script_path).execute_script(fake_device) == 'succes'
-
-
-class TestMonkeyReplay(object):
-    @pytest.fixture()
-    def script_path(self, tmpdir):
-        temp_file = tmpdir.join("script")
-        temp_file.write('\n'.join(['{"type": "hello"}',
-                                   '{"type": "dont"}']))
-        return str(temp_file)
-
-    def test_replay_init(self, script_path):
-        replay = MonkeyReplay(script_path, monkeyrunner_path="test/monkey")
-        assert replay.path == script_path
-        assert replay.monkeyrunner == 'test/monkey'
-
-    @patch('subprocess.Popen')
-    def test_monkeyreplay_execute_script_succes(self, mock, script_path):
-        subprocess_mock = Mock()
-        subprocess_mock.communicate.return_value = [b'output', b'error']
-        subprocess_mock.wait.return_value = 0
-        mock.return_value = subprocess_mock
-        monkey_path = '/usr/lib/android-sdk/tools/monkeyrunner'
-        monkey_command = "{} -plugin jyson-1.0.2.jar MonkeyPlayer/replayLogic.py {}".format(monkey_path,
-                                                                                            script_path).split(" ")
-        assert MonkeyReplay(script_path, monkeyrunner_path=monkey_path).execute_script(Mock()) == 0
-        mock.assert_called_once_with(monkey_command, cwd=paths.ROOT_DIR, shell=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-
-    @patch('subprocess.Popen')
-    def test_monkeyreplay_execute_script_error(self, mock, script_path):
-        subprocess_mock = Mock()
-        subprocess_mock.communicate.return_value = [b'error_output', b'fake_error']
-        subprocess_mock.wait.return_value = 1
-        mock.return_value = subprocess_mock
-        monkey_path = '/usr/lib/android-sdk/tools/monkeyrunner'
-        with pytest.raises(Exception) as expect_ex:
-            MonkeyReplay(script_path, monkeyrunner_path=monkey_path).execute_script(Mock())
-        assert expect_ex.type == MonkeyReplayError
-        assert str(expect_ex.value) == 'error_output'
-
-
-class TestMonkeyrunner(object):
-    @pytest.fixture()
-    def script_path(self, tmpdir):
-        temp_file = tmpdir.join("script")
-        temp_file.write('\n'.join(['{"type": "hello"}',
-                                   '{"type": "dont"}']))
-        return str(temp_file)
-
-    def test_init_runner(self, script_path):
-        monkey_path = '/usr/lib/android-sdk/tools/monkeyrunner'
-        runner = MonkeyRunner(script_path, monkeyrunner_path=monkey_path)
-        assert type(runner) == MonkeyRunner
-        assert runner.monkeyrunner_path == monkey_path
-
-    @patch('subprocess.run')
-    def test_execute_script_succes(self, mock_subprocess, script_path):
-        monkey_path = '/usr/lib/android-sdk/tools/monkeyrunner'
-        monkey_playback_path = '/usr/lib/android-sdk/tools/swt/monkeyrunner/scripts/monkey_playback.py'
-        mock_subprocess.return_value = Mock()
-        mock_subprocess.return_value.returncode = 0
-        mock_subprocess.return_value.stdout = b'success'
-        runner_return = MonkeyRunner(script_path, monkeyrunner_path=monkey_path, monkey_playback_path=monkey_playback_path).execute_script(Mock())
-        mock_subprocess.assert_called_once_with([monkey_path, monkey_playback_path, script_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        assert runner_return == 0
-
-    @patch('subprocess.run')
-    def test_execute_script_error(self, mock_subprocess, script_path):
-        monkey_path = '/usr/lib/android-sdk/tools/monkeyrunner'
-        monkey_playback_path = '/usr/lib/android-sdk/tools/swt/monkeyrunner/scripts/monkey_playback.py'
-        mock_subprocess.return_value = Mock()
-        mock_subprocess.return_value.returncode = 1
-        mock_subprocess.return_value.stdout = b'SocketException'
-        with pytest.raises(Exception) as expect_ex:
-            MonkeyRunner(script_path, monkeyrunner_path=monkey_path, monkey_playback_path=monkey_playback_path).execute_script(Mock())
-        assert expect_ex.type == MonkeyRunnerError
-        assert str(expect_ex.value) == 'SocketException'
-
 
 class TestScript(object):
     @pytest.fixture()

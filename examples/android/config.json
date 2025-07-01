@@ -1,7 +1,7 @@
 {
   "type": "native",
   "devices": {
-    "OPNord": {}
+    "Pixel 6": {}
   },
   "repetitions": 3,
   "apps": [
@@ -10,7 +10,7 @@
   "duration": 2000,
   "profilers": {
     "android": {
-      "subject_aggregation": "default",
+      "subject_aggregation": "none",
       "experiment_aggregation": "Scripts/aggregate_android.py",
       "sample_interval": 100,
       "data_points": [

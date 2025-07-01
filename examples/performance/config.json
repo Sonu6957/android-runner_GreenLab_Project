@@ -1,7 +1,7 @@
 {
   "type": "native",
   "devices": {
-    "nexus6p": {}
+    "Pixel 6": {}
   },
   "repetitions": 2,
   "apps": [

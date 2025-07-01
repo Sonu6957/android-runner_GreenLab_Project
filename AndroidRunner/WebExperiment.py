@@ -15,6 +15,12 @@ class WebExperiment(Experiment):
         self.browsers = [BrowserFactory.get_browser(b)() for b in config.get('browsers', ['chrome'])]
         Tests.check_dependencies(self.devices, [b.package_name for b in self.browsers])
         self.duration = Tests.is_integer(config.get('duration', 0)) / 1000
+        self.config = config
+    
+    # Browsers have version specific formatting, allows re-creation if needed
+    def regenerate_browsers(self, device):
+        # Regenerate browsers based on device version
+        self.browsers = [BrowserFactory.get_browser(b)(device) for b in self.config.get('browsers', ['chrome'])]
 
     def run(self, device, path, run, browser_name):
         browser = None
@@ -22,7 +28,8 @@ class WebExperiment(Experiment):
             if browser_name in browserItem.to_string():
                 browser = browserItem
         kwargs = {
-            'browser': browser
+            'browser': browser,
+            'app': browser.package_name
         }
         self.before_run(device, path, run, **kwargs)
         self.after_launch(device, path, run, **kwargs)
@@ -63,6 +70,10 @@ class WebExperiment(Experiment):
         device.shell('logcat -c')
         kwargs['browser'].start(device)
         time.sleep(5)
+
+    def before_experiment(self, device, *args, **kwargs):
+        super().before_experiment(self, device, *args, **kwargs)
+        self.regenerate_browsers(device)
 
     def interaction(self, device, path, run, *args, **kwargs):
         kwargs['browser'].load_url(device, path)

@@ -11,8 +11,17 @@ class Browser(ABC):
 
     def start(self, device):
         self.logger.info('%s: Start' % device.id)
-        device.launch_activity(self.package_name, self.main_activity, from_scratch=True, force_stop=True,
-                               action='android.intent.action.VIEW')
+        
+        kwargs = {
+            'from_scratch': True, 
+            'force_stop':   True,
+            'action':       'android.intent.action.VIEW',
+        }
+
+        if device != None and int(device.get_version()) > 12:
+            kwargs['data_uri'] = "about:blank"
+
+        device.launch_activity(self.package_name, self.main_activity, **kwargs)
 
     def load_url(self, device, url):
         self.logger.info('%s: Load URL: %s' % (device.id, url))

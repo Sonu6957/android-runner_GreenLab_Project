@@ -1,4 +1,4 @@
-import imp
+import importlib
 import logging
 import os.path as op
 import sys
@@ -8,8 +8,19 @@ import pytest
 import paths
 from mock import patch, Mock, call
 from AndroidRunner.util import makedirs
-main = imp.load_source('runner_main', op.join(op.dirname(paths.__file__), '__main__.py'))
 
+# Suggested imp.load_source replacement, since python 3.12 (https://docs.python.org/3/whatsnew/3.12.html#imp)
+def load_source(modname, filename):
+    loader = importlib.machinery.SourceFileLoader(modname, filename)
+    spec = importlib.util.spec_from_file_location(modname, filename, loader=loader)
+    module = importlib.util.module_from_spec(spec)
+    # The module is always executed and not cached in sys.modules.
+    # Uncomment the following line to cache the module.
+    sys.modules[module.__name__] = module
+    loader.exec_module(module)
+    return module
+
+main = load_source('runner_main', op.join(op.dirname(paths.__file__), '__main__.py'))
 
 class TestRunnerMain(object):
 
