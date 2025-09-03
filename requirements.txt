@@ -4,3 +4,4 @@ lxml
 psutil
 pandas
 numpy
+perfetto

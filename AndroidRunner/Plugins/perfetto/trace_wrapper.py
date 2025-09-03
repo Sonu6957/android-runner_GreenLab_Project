@@ -2,9 +2,10 @@ import subprocess
 import platform
 import pandas as pd
 from io import StringIO
+from pathlib import Path
 
 class PerfettoTrace(object):
-    def __init__(self, trace_path, trace_processor_path):
+    def __init__(self, trace_path, trace_processor_path=Path(__file__).resolve().parent / "trace_processor"):
         """ Inits PerfettoTrace with the trace_path and trace_processor_path.
 
         Parameters
