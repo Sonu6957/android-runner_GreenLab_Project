@@ -116,10 +116,10 @@ class Experiment(object):
     def run_run(self, current_run):
         if 'browser' in current_run:
             self.run(self.devices.get_device(current_run['device']), current_run['path'],
-                     int(current_run['runCount']), current_run['browser'])
+                     int(current_run['runCount']), current_run, browser=current_run['browser'])
         else:
             self.run(self.devices.get_device(current_run['device']), current_run['path'],
-                     int(current_run['runCount']), None)
+                     int(current_run['runCount']), current_run)
 
     def finish_run(self, current_run):
         self.progress.run_finished(current_run['runId'])
@@ -190,23 +190,23 @@ class Experiment(object):
             raise ConfigError("Experiment.stop_run() can only be called when a valid run_stopping_condition value is set in the config.")
         self.queue.put(PrematureStoppableRun.STOPPING_MECHANISM_FUNCTION_CALL)
    
-    def run(self, device, path, run, dummy):
-        self.before_run(device, path, run)
+    def run(self, device, path, run_id, current_run, **kwargs):
+        self.before_run(device, path, run_id, current_run=current_run, **kwargs)
 
         self.usb_handler.disable_usb()
-        self.start_profiling(device, path, run)
+        self.start_profiling(device, path, run_id)
 
         if self.run_stopping_condition_config:
             self.queue = mp.Queue()
-            premature_stoppable_run = PrematureStoppableRun(self.run_stopping_condition_config, self.queue, self.interaction, device, path, run)
+            premature_stoppable_run = PrematureStoppableRun(self.run_stopping_condition_config, self.queue, self.interaction, device, path, run_id)
             premature_stoppable_run.run()
         else:
-            self.interaction(device, path, run)
+            self.interaction(device, path, run_id, current_run=current_run)
 
-        self.stop_profiling(device, path, run)
+        self.stop_profiling(device, path, run_id)
         self.usb_handler.enable_usb()
 
-        self.after_run(device, path, run)
+        self.after_run(device, path, run_id)
 
     def before_experiment(self, device, *args, **kwargs):
         """Hook executed before the first run of a device in current experiment"""
@@ -216,10 +216,13 @@ class Experiment(object):
         """Hook executed before the first run for a subject"""
         pass
 
+    def get_run_count(self):
+        return self.repetitions
+
     def before_run(self, device, path, run, *args, **kwargs):
         """Hook executed before a run"""
         self.profilers.set_output()
-        self.logger.info('Run %s/%s of subject "%s" on %s' % (run, self.repetitions, path, device.name))
+        self.logger.info('Run %s/%s of subject "%s" on %s' % (run, self.get_run_count(), path, device.name))
         device.shell('logcat -c')
         self.logger.info('Logcat cleared')
         self.scripts.run('before_run', device, *args, **kwargs)

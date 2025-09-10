@@ -1,8 +1,9 @@
 import subprocess
 import platform
 import pandas as pd
-from io import StringIO
+import os
 from pathlib import Path
+from io import StringIO
 
 class PerfettoTrace(object):
     def __init__(self, trace_path, trace_processor_path=Path(__file__).resolve().parent / "trace_processor"):

@@ -409,9 +409,9 @@ class TestExperiment(object):
 
         default_experiment.run(mock_device, path, run, None)
 
-        expected_calls = [call.before_run_managed(mock_device, path, run),
+        expected_calls = [call.before_run_managed(mock_device, path, run, current_run=None),
                           call.start_profiling_managed(mock_device, path, run),
-                          call.interaction_managed(mock_device, path, run),
+                          call.interaction_managed(mock_device, path, run, current_run=None),
                           call.stop_profiling_managed(mock_device, path, run),
                           call.after_run_managed(mock_device, path, run)]
         assert mock_manager.mock_calls == expected_calls
@@ -447,7 +447,7 @@ class TestExperiment(object):
 
         default_experiment.run(mock_device, path, run, None)
 
-        expected_calls = [call.before_run_managed(mock_device, path, run),
+        expected_calls = [call.before_run_managed(mock_device, path, run, current_run=None),
                           call.start_profiling_managed(mock_device, path, run),
                           call.premature_stoppable_run_init(run_stopping_condition_config, queue_value, interaction, mock_device, path, run),
                           call.premature_stoppable_run_run(),
@@ -739,7 +739,7 @@ class TestExperiment(object):
         test_run = {'device': 'test_device', 'path': 'test_path', 'runCount': '123', 'browser': 'test_browser'}
         default_experiment.run_run(test_run)
 
-        run.assert_called_once_with(mock_device, test_run['path'], int(test_run['runCount']), test_run['browser'])
+        run.assert_called_once_with(mock_device, test_run['path'], int(test_run['runCount']), test_run, browser=test_run['browser'])
 
     @patch('AndroidRunner.Experiment.Experiment.run')
     def test_run_run_wo_browser(self, run, default_experiment):
@@ -750,7 +750,7 @@ class TestExperiment(object):
         test_run = {'device': 'test_device', 'path': 'test_path', 'runCount': '123'}
         default_experiment.run_run(test_run)
 
-        run.assert_called_once_with(mock_device, test_run['path'], int(test_run['runCount']), None)
+        run.assert_called_once_with(mock_device, test_run['path'], int(test_run['runCount']), test_run)
 
     @patch('AndroidRunner.Experiment.Experiment.last_run_device')
     @patch('AndroidRunner.Experiment.Experiment.last_run_subject')
@@ -1354,7 +1354,7 @@ class TestNativeExperiment(object):
 
         native_experiment.before_run(mock_device, path, run, *args, **kwargs)
 
-        expected_calls = [call.before_run_managed(mock_device, path, run),
+        expected_calls = [call.before_run_managed(mock_device, path, run, *args, **kwargs),
                           call.mock_device_managed.configure_settings_device('com.test.app', enable=True),
                           call.mock_device_managed.launch_package('com.test.app'),
                           call.after_launch_managed(mock_device, path, run)]
