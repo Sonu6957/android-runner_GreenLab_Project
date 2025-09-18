@@ -2,6 +2,7 @@ import hashlib
 import logging
 import os
 import sys
+import ast
 from random import randint
 
 import lxml.etree as et
@@ -49,12 +50,15 @@ class Progress(object):
         return et.fromstring(experiment_xml)
 
     @staticmethod
-    def build_subject_xml(device, path, browser=None):
+    def build_subject_xml(device, path, browser=None, experiment_arg=None):
         device_xml = '<device>{}</device>'.format(device)
-        path_xml = '<path>{}</path>'.format(path)
+        path_xml = '<path>{}</path>'.format(path)  
         if browser is not None:
             browser_xml = '<browser>{}</browser>'.format(browser)
             return '{}{}{}'.format(device_xml, path_xml, browser_xml)
+        elif experiment_arg is not None:
+            arg_xml = '<arg>{}</arg>'.format(experiment_arg)
+            return '{}{}{}'.format(device_xml, path_xml, arg_xml)
         else:
             return '{}{}'.format(device_xml, path_xml)
 
@@ -67,6 +71,13 @@ class Progress(object):
                 if config['type'] == 'web':
                     for browser in config['browsers']:
                         subject_xml = self.build_subject_xml(device, path, browser)
+                        for run in range(config['repetitions']):
+                            runs_xml = runs_xml + '<run runId="{}">{}<runCount>{}</runCount></run>'. \
+                                format(run_id, subject_xml, run + 1)
+                            run_id += 1
+                elif config['type'] == 'native' and (config.get("experiment_args", []) != []):
+                    for experiment_arg in config.get("experiment_args", []):
+                        subject_xml = self.build_subject_xml(device, path, experiment_arg=experiment_arg)
                         for run in range(config['repetitions']):
                             runs_xml = runs_xml + '<run runId="{}">{}<runCount>{}</runCount></run>'. \
                                 format(run_id, subject_xml, run + 1)
@@ -113,14 +124,27 @@ class Progress(object):
         browser = run_xml.find('browser')
         if browser is not None:
             run['browser'] = run_xml.find('browser').text
+        
+        arg = run_xml.find("arg")
+        if arg is not None:
+            try:
+                arg = ast.literal_eval(run_xml.find("arg").text)
+            except:
+                arg = run_xml.find("arg").text
+            run["experimentArg"] = arg
+
         return run
 
     def get_run_count(self, run_xml, device, path):
         runs_done = self.progress_xml_content.find('runsDone')
         browser_val = run_xml.find('browser')
+        arg_val = run_xml.find('arg')
         if browser_val is not None:
             browser_name = browser_val.text
             query = "run[device='{}' and path='{}' and browser='{}']".format(device, path, browser_name)
+        elif arg_val is not None:
+            arg_val = arg_val.text
+            query = "run[device='{}' and path='{}' and arg='{}']".format(device, path, arg_val)
         else:
             query = "run[device='{}' and path='{}']".format(device, path)
         elements = runs_done.xpath(query)

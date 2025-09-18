@@ -11,8 +11,9 @@
   ],
   "profilers": {
     "perfetto": {
-        "config_file" : "examples/perfetto/memory_perfetto.bin",
-	"config_file_format" : "binary"
+        "config_file" : "examples/perfetto/perfetto_config.pbtx",
+        "subject_aggregation" : "aggregate_scripts/aggregate_subject.py",
+	    "config_file_format" : "text"
     } 
   },
   "scripts": {

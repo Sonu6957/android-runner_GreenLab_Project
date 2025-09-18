@@ -10,6 +10,8 @@ class NativeExperiment(Experiment):
     def __init__(self, config, progress, restart):
         self.package = None
         self.duration = Tests.is_integer(config.get('duration', 0)) / 1000
+        self.autostart_subject = config.get('autostart_subject', True)
+        self.experiment_args = config.get('experiment_args', [0]) # Just a single argument, if none are specified
         super(NativeExperiment, self).__init__(config, progress, restart)
         self.pre_installed_apps = config.get('apps', [])
         for apk in config.get('paths', []):
@@ -35,11 +37,14 @@ class NativeExperiment(Experiment):
                 device.install(path)
             self.package = op.splitext(op.basename(path))[0]
 
-
+    def get_run_count(self):
+        return self.repetitions * len(self.experiment_args)
+    
     def before_run(self, device, path, run, *args, **kwargs):
-        super(NativeExperiment, self).before_run(device, path, run)
-        device.configure_settings_device(self.package, enable=True)
-        device.launch_package(self.package)
+        super(NativeExperiment, self).before_run(device, path, run, *args, **kwargs)
+        if self.autostart_subject:
+            device.configure_settings_device(self.package, enable=True)
+            device.launch_package(self.package)
         time.sleep(1)
         self.after_launch(device, path, run)
 
