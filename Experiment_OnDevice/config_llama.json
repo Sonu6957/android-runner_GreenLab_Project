@@ -1,0 +1,44 @@
+{
+  "type": "native",
+  "devices": {
+    "Pixel 6": {}
+  },
+   "apps":["com.android.settings"],
+  "repetitions": 30,
+  
+  "duration": 5000,
+  "profilers": {
+    "perfetto": {
+        "config_file" : "./Experiment_OnDevice/Perfetto_config.pbtxt",
+        "subject_aggregation" : "./Experiment_OnDevice/Perfetto_aggregator_Script.py",
+	    "config_file_format" : "text"
+    },
+    "batterymanager": {
+      "experiment_aggregation": "default",
+      "sample_interval": 100,
+      "data_points": [
+        "BATTERY_PROPERTY_CURRENT_NOW", "EXTRA_VOLTAGE"
+      ],
+      "persistency_strategy": [
+        "adb_log"
+      ]
+    }
+  },
+  "scripts": {
+    "before_experiment": "Scripts/before_experiment.py",
+    "before_run": "Scripts/before_run.py",
+    "after_launch": "Scripts/after_launch.py",
+    "interaction": [
+      {
+        "type": "python3",
+        "path": "Scripts/Interactive_Llama.py",
+        
+        "logcat_regex": "some keyword"
+      }
+    ],
+    "before_close": "Scripts/before_close.py",
+    "after_run": "Scripts/after_run.py",
+    "after_experiment": "Scripts/after_experiment.py"
+  },
+  "time_between_run": 500
+}

@@ -1,0 +1,69 @@
+# -----------------------
+# Buffers
+# -----------------------
+buffers: {
+  size_kb: 10240
+  fill_policy: RING_BUFFER
+}
+buffers: {
+  size_kb: 20480
+  fill_policy: RING_BUFFER
+}
+
+# -----------------------
+# CPU Scheduling (sched)
+# -----------------------
+data_sources: {
+  config {
+    name: "linux.ftrace"
+    ftrace_config {
+      buffer_size_kb: 4096
+      drain_period_ms: 250
+      ftrace_events: "sched/sched_switch"
+      ftrace_events: "sched/sched_wakeup"
+      ftrace_events: "power/cpu_frequency"
+      ftrace_events: "power/cpu_idle"
+    }
+  }
+}
+
+# -----------------------
+# Memory usage (system)
+# -----------------------
+data_sources: {
+  config {
+    name: "linux.sys_stats"
+    sys_stats_config {
+      meminfo_period_ms: 1000
+      vmstat_period_ms: 1000
+    }
+  }
+}
+
+# -----------------------
+# Process memory counters
+# -----------------------
+data_sources: {
+  config {
+    name: "linux.process_stats"
+    process_stats_config {
+      proc_stats_poll_ms: 1000
+      scan_all_processes_on_start: true
+    }
+  }
+}
+
+# -----------------------
+# Battery / Energy
+# -----------------------
+data_sources: {
+  config {
+    name: "android.power"
+    android_power_config {
+      battery_poll_ms: 1000
+      collect_energy_estimation_breakdown: true
+      collect_power_rails: true
+    }
+  }
+}
+
